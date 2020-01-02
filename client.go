@@ -40,18 +40,21 @@ func (sc *Client) Post(msg Message) error {
 		return err
 	}
 	if rsp.StatusCode != http.StatusOK {
-		return StatusErr{rsp.StatusCode}
+		return StatusErr(rsp.StatusCode)
 	}
 	return nil
 }
 
 // StatusErr is an unexpected status
-type StatusErr struct {
-	Code int
+type StatusErr int
+
+func (se StatusErr) String() string {
+	return http.StatusText(int(se))
 }
 
 func (se StatusErr) Error() string {
-	return fmt.Sprintf("unexpected status: %q", se.Code)
+	return fmt.Sprintf("unexpected status: %d %s",
+		int(se), se.String())
 }
 
 type Field struct {
