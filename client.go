@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"net/http"
 )
 
@@ -39,10 +41,15 @@ func (sc *Client) Post(msg Message) error {
 	if err != nil {
 		return err
 	}
+	defer rsp.Body.Close()
+
 	if rsp.StatusCode != http.StatusOK {
 		return StatusErr(rsp.StatusCode)
 	}
-	return nil
+
+	// Drain connection
+	_, err = io.Copy(ioutil.Discard, rsp.Body)
+	return err
 }
 
 // StatusErr is an unexpected status
