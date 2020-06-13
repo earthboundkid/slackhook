@@ -71,13 +71,14 @@ type Field struct {
 }
 
 type Attachment struct {
+	Pretext   string  `json:"pretext,omitempty"`
 	Fallback  string  `json:"fallback"`
-	Color     string  `json:"color"`
-	Title     string  `json:"title"`
-	TitleLink string  `json:"title_link"`
-	Text      string  `json:"text"`
-	TimeStamp int64   `json:"ts"`
-	Fields    []Field `json:"fields"`
+	Color     string  `json:"color,omitempty"`
+	Title     string  `json:"title,omitempty"`
+	TitleLink string  `json:"title_link,omitempty"`
+	Text      string  `json:"text,omitempty"`
+	TimeStamp int64   `json:"ts,omitempty"`
+	Fields    []Field `json:"fields,omitempty"`
 }
 
 // Message is the JSON object expected by Slack
