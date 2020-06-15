@@ -2,11 +2,14 @@ package slackhook
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
+
+	"golang.org/x/net/context/ctxhttp"
 )
 
 // Client posts messages to a Slack webhook
@@ -26,9 +29,17 @@ func New(hookURL string, c *http.Client) *Client {
 	return &Client{hookURL, c}
 }
 
-// Posts message to Slack. Noop if client is nil.
+// Post message to Slack. Noop if client is nil.
 // Returns StatusErr if response is not 200 OK.
 func (sc *Client) Post(msg Message) error {
+	ctx := context.Background()
+	return sc.PostCtx(ctx, msg)
+}
+
+// PostCtx posts message to Slack with context.
+// Noop if client is nil.
+// Returns StatusErr if response is not 200 OK.
+func (sc *Client) PostCtx(ctx context.Context, msg Message) error {
 	if sc == nil {
 		return nil
 	}
@@ -37,7 +48,7 @@ func (sc *Client) Post(msg Message) error {
 		return err
 	}
 	r := bytes.NewReader(blob)
-	rsp, err := sc.c.Post(sc.hookURL, "application/json", r)
+	rsp, err := ctxhttp.Post(ctx, sc.c, sc.hookURL, "application/json", r)
 	if err != nil {
 		return err
 	}
