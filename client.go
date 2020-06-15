@@ -75,10 +75,10 @@ func (se StatusErr) Error() string {
 		int(se), se.String())
 }
 
-type Field struct {
-	Title string `json:"title"`
-	Value string `json:"value"`
-	Short bool   `json:"short"`
+// Message is the JSON object expected by Slack
+type Message struct {
+	Text        string       `json:"text"`
+	Attachments []Attachment `json:"attachments"`
 }
 
 type Attachment struct {
@@ -92,8 +92,8 @@ type Attachment struct {
 	Fields    []Field `json:"fields,omitempty"`
 }
 
-// Message is the JSON object expected by Slack
-type Message struct {
-	Text        string       `json:"text"`
-	Attachments []Attachment `json:"attachments"`
+type Field struct {
+	Title string `json:"title"`
+	Value string `json:"value"`
+	Short bool   `json:"short"`
 }
