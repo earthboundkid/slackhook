@@ -8,6 +8,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 
 	"golang.org/x/net/context/ctxhttp"
 )
@@ -29,6 +30,24 @@ func New(hookURL string, c *http.Client) *Client {
 	return &Client{hookURL, c}
 }
 
+// Set implements flag.Value
+func (sc *Client) Set(s string) error {
+	if s == "" {
+		return nil
+	}
+	_, err := url.Parse(s)
+	if err != nil {
+		return fmt.Errorf("bad Slack incoming webbook hook URL: %v", err)
+	}
+	sc.hookURL = s
+	return nil
+}
+
+// String implements flag.Value
+func (sc *Client) String() string {
+	return ""
+}
+
 // Post message to Slack. Noop if client is nil.
 // Returns StatusErr if response is not 200 OK.
 func (sc *Client) Post(msg Message) error {
@@ -40,7 +59,7 @@ func (sc *Client) Post(msg Message) error {
 // Noop if client is nil.
 // Returns StatusErr if response is not 200 OK.
 func (sc *Client) PostCtx(ctx context.Context, msg Message) error {
-	if sc == nil {
+	if sc == nil || sc.hookURL == "" {
 		return nil
 	}
 	blob, err := json.Marshal(msg)
