@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 
@@ -58,7 +57,12 @@ func (sc *Client) Post(msg Message) error {
 // PostCtx posts message to Slack with context.
 // Noop if client is nil.
 // Returns StatusErr if response is not 200 OK.
-func (sc *Client) PostCtx(ctx context.Context, msg Message) error {
+func (sc *Client) PostCtx(ctx context.Context, msg Message) (err error) {
+	defer func() {
+		if err != nil {
+			err = fmt.Errorf("problem sending message to Slack: %w", err)
+		}
+	}()
 	if sc == nil || sc.hookURL == "" {
 		return nil
 	}
@@ -73,12 +77,18 @@ func (sc *Client) PostCtx(ctx context.Context, msg Message) error {
 	}
 	defer rsp.Body.Close()
 
+	// Drain connection
+	// Slack shouldn't be giving us anything to discard,
+	// but if they do, read some of it to try to reuse connections
+	const maxDiscardSize = 640 * 1 << 10
+	if _, err = io.CopyN(io.Discard, rsp.Body, maxDiscardSize); err == io.EOF {
+		err = nil
+	}
+
 	if rsp.StatusCode != http.StatusOK {
 		return StatusErr(rsp.StatusCode)
 	}
 
-	// Drain connection
-	_, err = io.Copy(ioutil.Discard, rsp.Body)
 	return err
 }
 
