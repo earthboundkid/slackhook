@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/carlmjohnson/errutil"
+	"github.com/carlmjohnson/errorx"
 	"github.com/carlmjohnson/requests"
 )
 
@@ -33,7 +33,7 @@ func New(hookURL string, c *http.Client) *Client {
 // Noop if client is nil.
 // Returns an error if response is not 200 OK.
 func (sc *Client) PostCtx(ctx context.Context, msg Message) (err error) {
-	defer errutil.Trace(&err)
+	defer errorx.Trace(&err)
 	return sc.rb.Clone().
 		BodyJSON(msg).
 		Fetch(ctx)

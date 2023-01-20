@@ -1,9 +1,9 @@
 module github.com/carlmjohnson/slackhook
 
-go 1.17
+go 1.20
 
 require (
-	github.com/carlmjohnson/errutil v0.21.5
+	github.com/carlmjohnson/errorx v0.0.0-20230119205311-c48cb3ba5528
 	github.com/carlmjohnson/requests v0.21.10
 )
 
