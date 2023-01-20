@@ -1,5 +1,5 @@
-github.com/carlmjohnson/errutil v0.21.5 h1:4WpeYOqUXCg1LVrc3qp7Tzr0SJgpipupdVIpNmmwd/U=
-github.com/carlmjohnson/errutil v0.21.5/go.mod h1:DMNW3MBHsaV/EPm8pjs4sA/gNjNsG4rUzbAfOh++gSM=
+github.com/carlmjohnson/errorx v0.0.0-20230119205311-c48cb3ba5528 h1:5DGGinRb8T20pZOQeeEEcbu+S7L37C7vZHALVLVCPd8=
+github.com/carlmjohnson/errorx v0.0.0-20230119205311-c48cb3ba5528/go.mod h1:toJQ39OZZ2ddtRygoDX7Spj8IC8S/AfSA5q+9vZDmus=
 github.com/carlmjohnson/requests v0.21.10 h1:+HiFqt0IXfb0UqWHswJzI17LNGDUOYzfC5egC4tUgsU=
 github.com/carlmjohnson/requests v0.21.10/go.mod h1:1i7g2I2eq5ZlNY6V/2wz5d2IVMH0TXyARtZ8P0t0/i4=
 golang.org/x/net v0.0.0-20210525063256-abc453219eb5 h1:wjuX4b5yYQnEQHzd+CBcrcC6OVR2J1CN6mUy0oSxIPo=
