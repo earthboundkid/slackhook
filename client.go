@@ -2,39 +2,57 @@ package slackhook
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 
 	"github.com/carlmjohnson/errorx"
 	"github.com/carlmjohnson/requests"
 )
 
+// Logger is any function that behaves like slog.InfoContext, slog.DebugContext, etc.
+type Logger = func(ctx context.Context, msg string, args ...any)
+
+// NoOpLogger does nothing with log messages.
+func NoOpLogger(ctx context.Context, msg string, args ...any) {}
+
+// Magic URL to use a mock client
+const MockClient = "slack://mock"
+
 // Client posts messages to a Slack webhook
 type Client struct {
-	rb *requests.Builder
+	hookURL string
+	c       *http.Client
 }
 
-// New returns mock client if hookURL and c are blank. Uses http.DefaultClient if c is nil.
+// New returns mock client if hookURL is [MockClient].
+// Uses http.DefaultClient if c is nil.
 func New(hookURL string, c *http.Client) *Client {
-	if hookURL == "" && c == nil {
-		hookURL = "protocol://nosuch.example"
-		c = &http.Client{
-			Transport: requests.ReplayString("HTTP/1.1 200 OK\r\n\r\n"),
-		}
-	}
-	return &Client{
-		requests.
-			URL(hookURL).
-			Client(c).
-			CheckStatus(http.StatusOK),
-	}
+	return &Client{hookURL, c}
 }
 
 // PostCtx posts message to Slack with context.
 // Noop if client is nil.
 // Returns an error if response is not 200 OK.
-func (sc *Client) PostCtx(ctx context.Context, msg Message) (err error) {
+func (sc *Client) PostCtx(ctx context.Context, l Logger, msg Message) (err error) {
 	defer errorx.Trace(&err)
-	return sc.rb.Clone().
+
+	isMock := sc.hookURL == MockClient
+	c := sc.c
+	if isMock {
+		c = &http.Client{
+			Transport: requests.ReplayString("HTTP/1.1 200 OK\r\n\r\n"),
+		}
+	}
+
+	if isMock {
+		b, _ := json.Marshal(&msg)
+		l(ctx, "slackhook: PostCtx", "mock-client", isMock, "output", b)
+	} else {
+		l(ctx, "slackhook: PostCtx", "mock-client", isMock)
+	}
+	return requests.
+		URL(sc.hookURL).
+		Client(c).
 		BodyJSON(msg).
 		Fetch(ctx)
 }
