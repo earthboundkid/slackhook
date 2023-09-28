@@ -24,6 +24,11 @@ type Client struct {
 	hookURL string
 }
 
+// New returns a new client with the hookURL set.
+func New(hookURL string) *Client {
+	return &Client{hookURL}
+}
+
 // Set the hookURL for a Client.
 // If hookURL is [MockClient],
 // Client will use a mock client.
