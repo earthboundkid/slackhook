@@ -8,10 +8,7 @@ import (
 )
 
 func TestClient(t *testing.T) {
-	var c slackhook.Client
-	if err := c.Set(slackhook.MockClient); err != nil {
-		t.Fatal(err)
-	}
+	c := slackhook.New(slackhook.MockClient)
 	err := c.Post(context.Background(), slackhook.NoOpLogger, nil, slackhook.Message{
 		Text: "Hello",
 	})
