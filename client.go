@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"net/url"
 
 	"github.com/carlmjohnson/errorx"
 	"github.com/carlmjohnson/requests"
@@ -15,31 +16,42 @@ type Logger = func(ctx context.Context, msg string, args ...any)
 // NoOpLogger does nothing with log messages.
 func NoOpLogger(ctx context.Context, msg string, args ...any) {}
 
-// Magic URL to use a mock client
+// Magic URL to use a mock client in dev.
 const MockClient = "slack://mock"
 
-// Client posts messages to a Slack webhook
+// Client posts messages to a Slack webhook URL.
 type Client struct {
 	hookURL string
-	c       *http.Client
 }
 
-// New returns mock client if hookURL is [MockClient].
-// Uses http.DefaultClient if c is nil.
-func New(hookURL string, c *http.Client) *Client {
-	return &Client{hookURL, c}
+// Set the hookURL for a Client.
+// If hookURL is [MockClient],
+// Client will use a mock client.
+// Set is part of the flag.Value interface.
+func (c *Client) Set(hookURL string) error {
+	_, err := url.Parse(hookURL)
+	if err != nil {
+		return err
+	}
+	c.hookURL = hookURL
+	return nil
 }
 
-// PostCtx posts message to Slack with context.
-// Noop if client is nil.
+// String is part of the flag.Value interface.
+func (c *Client) String() string {
+	return ""
+}
+
+// Post message to Slack.
+// Logger must not be nil.
+// Uses http.DefaultClient if cl is nil.
 // Returns an error if response is not 200 OK.
-func (sc *Client) PostCtx(ctx context.Context, l Logger, msg Message) (err error) {
+func (sc *Client) Post(ctx context.Context, l Logger, cl *http.Client, msg Message) (err error) {
 	defer errorx.Trace(&err)
 
 	isMock := sc.hookURL == MockClient
-	c := sc.c
 	if isMock {
-		c = &http.Client{
+		cl = &http.Client{
 			Transport: requests.ReplayString("HTTP/1.1 200 OK\r\n\r\n"),
 		}
 	}
@@ -52,7 +64,7 @@ func (sc *Client) PostCtx(ctx context.Context, l Logger, msg Message) (err error
 	}
 	return requests.
 		URL(sc.hookURL).
-		Client(c).
+		Client(cl).
 		BodyJSON(msg).
 		Fetch(ctx)
 }
