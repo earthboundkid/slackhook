@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/carlmjohnson/slackhook"
+	"github.com/earthboundkid/slackhook/v2"
 )
 
 func TestClient(t *testing.T) {
