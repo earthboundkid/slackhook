@@ -1,10 +1,10 @@
-module github.com/carlmjohnson/slackhook
+module github.com/earthboundkid/slackhook/v2
 
-go 1.20
+go 1.25.0
 
 require (
-	github.com/carlmjohnson/errorx v0.23.2
-	github.com/carlmjohnson/requests v0.23.4
+	github.com/carlmjohnson/requests v0.25.1
+	github.com/earthboundkid/errorx/v2 v2.25.1
 )
 
-require golang.org/x/net v0.15.0 // indirect
+require golang.org/x/net v0.46.0 // indirect

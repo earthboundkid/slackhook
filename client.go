@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/carlmjohnson/errorx"
 	"github.com/carlmjohnson/requests"
+	"github.com/earthboundkid/errorx/v2"
 )
 
 // Logger is any function that behaves like slog.InfoContext, slog.DebugContext, etc.
@@ -33,17 +33,17 @@ func New(hookURL string) *Client {
 // If hookURL is [MockClient],
 // Client will use a mock client.
 // Set is part of the flag.Value interface.
-func (c *Client) Set(hookURL string) error {
+func (sc *Client) Set(hookURL string) error {
 	_, err := url.Parse(hookURL)
 	if err != nil {
 		return err
 	}
-	c.hookURL = hookURL
+	sc.hookURL = hookURL
 	return nil
 }
 
 // String is part of the flag.Value interface.
-func (c *Client) String() string {
+func (*Client) String() string {
 	return ""
 }
 
@@ -57,7 +57,12 @@ func (sc *Client) Post(ctx context.Context, l Logger, cl *http.Client, msg Messa
 	isMock := sc.hookURL == MockClient
 	if isMock {
 		cl = &http.Client{
-			Transport: requests.ReplayString("HTTP/1.1 200 OK\r\n\r\n"),
+			Transport: requests.RoundTripFunc(func(req *http.Request) (res *http.Response, err error) {
+				return &http.Response{
+					StatusCode: http.StatusNoContent,
+					Status:     http.StatusText(http.StatusNoContent),
+				}, nil
+			}),
 		}
 	}
 
